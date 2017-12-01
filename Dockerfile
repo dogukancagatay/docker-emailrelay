@@ -23,8 +23,8 @@ RUN apk add --no-cache --virtual .deps curl g++ make autoconf automake openssl-d
 ENV PORT=587
 COPY run.sh /run.sh
 
-ENTRYPOINT ["/usr/bin/dumb-init", "--"]
-CMD ["/run.sh"]
+ENTRYPOINT ["/usr/bin/dumb-init", "--", "/run.sh"]
+CMD []
 
 ENV SWAKS_OPTS="-tls"
 HEALTHCHECK --interval=2m --timeout=5s \
