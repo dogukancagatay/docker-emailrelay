@@ -12,7 +12,7 @@ RUN apk add --no-cache --virtual .deps curl g++ make autoconf automake openssl-d
  && curl -o emailrelay.tar.gz -L "${DOWNLOAD_URL}" \
  && tar xzf emailrelay.tar.gz \
  && cd emailrelay-1.9 \
- && ./configure --prefix=/usr --with-openssl --enable-ipv6 \
+ && ./configure --prefix=/usr --with-openssl \
  && make \
  && make install \
  && apk --no-cache del .deps \
