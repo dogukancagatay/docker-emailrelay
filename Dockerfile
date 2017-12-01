@@ -1,25 +1,31 @@
-FROM vshalts/alpine:alpine-3.4
+FROM alpine:latest
+LABEL maintainer="Aleksei Zhukov <drdaeman@drdaeman.pp.ru>"
 
-MAINTAINER Vadim Shalts <vshalts@gmail.com>
+RUN echo "@testing http://nl.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories \
+ && apk add --no-cache libstdc++ openssl ca-certificates dumb-init swaks@testing perl-net-ssleay \
+ && update-ca-certificates
 
-ENV VERSION 1.9
-ENV ARCH amd64
-ENV RELEASE emailrelay_${VERSION}_${ARCH}
-ENV PACKAGE ${RELEASE}.deb
-ENV URL http://sourceforge.net/projects/emailrelay/files/emailrelay/${VERSION}/${PACKAGE}/download
+ARG DOWNLOAD_URL=https://downloads.sourceforge.net/project/emailrelay/emailrelay/1.9/emailrelay-1.9-src.tar.gz
 
-RUN apk add --update libstdc++ && \
-    curl -o $PACKAGE -L "$URL" && \
-    dpkg -i $PACKAGE && \
-    rm -rf $PACKAGE && \
-    rm -rf /tmp/* /var/tmp/* /var/cache/apk/* /var/cache/distfiles/* && \
-    mkdir -p /var/spool/emailrelay
+RUN apk add --no-cache --virtual .deps curl g++ make autoconf automake openssl-dev \
+ && mkdir -p /tmp/build && cd /tmp/build \
+ && curl -o emailrelay.tar.gz -L "${DOWNLOAD_URL}" \
+ && tar xzf emailrelay.tar.gz \
+ && cd emailrelay-1.9 \
+ && ./configure --prefix=/usr --with-openssl --enable-ipv6 \
+ && make \
+ && make install \
+ && apk --no-cache del .deps \
+ && cd / \
+ && rm -rf /tmp/build /var/tmp/* /var/cache/apk/* /var/cache/distfiles/* \
+ && mkdir -p /var/spool/emailrelay
 
-# USER nobody
+ENV PORT=587
+COPY run.sh /run.sh
 
-ENV HOME /app
-# ENV EMAILRELAY_OPTS ""
+ENTRYPOINT ["/usr/bin/dumb-init", "--"]
+CMD ["/run.sh"]
 
-COPY run.sh /app/run.sh
-
-CMD ["/app/run.sh"]
+ENV SWAKS_OPTS="-tls"
+HEALTHCHECK --interval=2m --timeout=5s \
+  CMD swaks -S -h localhost -s localhost:${PORT:-587} -q HELO ${SWAKS_OPTS} || exit 1
