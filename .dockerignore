@@ -1,6 +1,2 @@
 .git
-.gitignore
-.gitattributes
 README.md
-emailrelay*.tar.gz
-emailrelay-*/

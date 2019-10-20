@@ -1,31 +1,40 @@
-FROM alpine:latest
-LABEL maintainer="Aleksei Zhukov <drdaeman@drdaeman.pp.ru>"
+FROM alpine:3.10 as builder
 
-RUN echo "@testing http://nl.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories \
- && apk add --no-cache libstdc++ openssl ca-certificates dumb-init swaks@testing perl-net-ssleay \
- && update-ca-certificates
+ARG DOWNLOAD_URL=https://downloads.sourceforge.net/project/emailrelay/emailrelay/2.1/emailrelay-2.1a-src.tar.gz
 
-ARG DOWNLOAD_URL=https://downloads.sourceforge.net/project/emailrelay/emailrelay/1.9/emailrelay-1.9-src.tar.gz
+RUN apk add --no-cache curl g++ make autoconf automake openssl-dev \
+    && mkdir -p /tmp/build && cd /tmp/build \
+    && curl -o emailrelay.tar.gz -L "${DOWNLOAD_URL}" \
+    && tar xzf emailrelay.tar.gz \
+    && cd emailrelay-* \
+    && ./configure --prefix=/app --with-openssl \
+    && make -j $(nproc --all) \
+    && make install
 
-RUN apk add --no-cache --virtual .deps curl g++ make autoconf automake openssl-dev \
- && mkdir -p /tmp/build && cd /tmp/build \
- && curl -o emailrelay.tar.gz -L "${DOWNLOAD_URL}" \
- && tar xzf emailrelay.tar.gz \
- && cd emailrelay-1.9 \
- && ./configure --prefix=/usr --with-openssl \
- && make \
- && make install \
- && apk --no-cache del .deps \
- && cd / \
- && rm -rf /tmp/build /var/tmp/* /var/cache/apk/* /var/cache/distfiles/* \
- && mkdir -p /var/spool/emailrelay
+FROM alpine:3.10
+MAINTAINER "Dogukan Cagatay <dcagatay@gmail.com>"
 
-ENV PORT=587
+ENV PORT="25" \
+    SWAKS_OPTS="" \
+    DEFAULT_OPTS="--no-daemon --no-syslog --log --log-time --remote-clients" \
+    SPOOL_DIR="/var/spool/emailrelay"
+
+RUN apk add --update --no-cache --repository http://dl-cdn.alpinelinux.org/alpine/edge/testing \
+    libstdc++ \
+    openssl \
+    ca-certificates \
+    dumb-init \
+    swaks \
+    bash \
+    perl-net-ssleay \
+    && rm -rf /var/tmp/* /var/cache/apk/* /var/cache/distfiles/* \
+    && mkdir -p "${SPOOL_DIR}"
+
 COPY run.sh /run.sh
+COPY --from=builder /app /app
 
 ENTRYPOINT ["/usr/bin/dumb-init", "--", "/run.sh"]
 CMD []
 
-ENV SWAKS_OPTS="-tls"
 HEALTHCHECK --interval=2m --timeout=5s \
-  CMD swaks -S -h localhost -s localhost:${PORT:-587} -q HELO ${SWAKS_OPTS} || exit 1
+    CMD swaks -S -h localhost -s localhost:${PORT} -q HELO ${SWAKS_OPTS} || exit 1

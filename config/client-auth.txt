@@ -1,0 +1,9 @@
+#
+# emailrelay secrets file
+#
+# Format: client plain user password
+#
+# Plain password should be in xtext encoded format (defined in RFC-1891) (space should be as +20, + as +2B, ## as +23, = as +3D)
+# http://emailrelay.sourceforge.net/index.html#reference_md_Authentication
+#
+#client plain user password

@@ -1,0 +1,13 @@
+#
+# emailrelay secrets file
+#
+# Format: server plain user password
+#         server none 192.168.1.* localipv4
+#         server none 192.168.1.0/24 localipv4
+#
+# Plain password should be in xtext encoded format (defined in RFC-1891) (space should be as +20, + as +2B, ## as +23, = as +3D)
+# http://emailrelay.sourceforge.net/index.html#reference_md_Authentication
+#
+#server none 127.0.0.1 localipv4
+#server none 192.168.1.* localipv4
+#server plain user password

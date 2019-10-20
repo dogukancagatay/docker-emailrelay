@@ -1,22 +1,75 @@
-Docker image for E-MailRelay
-============================
+# Docker image for E-MailRelay
+![MicroBadger Size](https://img.shields.io/microbadger/image-size/dcagatay/emailrelay)
+![MicroBadger Layers](https://img.shields.io/microbadger/layers/dcagatay/emailrelay)
+![Docker Pulls](https://img.shields.io/docker/pulls/dcagatay/emailrelay)
+![Docker Stars](https://img.shields.io/docker/stars/dcagatay/emailrelay)
 
-Usage example:
+Available Tags:
+- [2.1](https://github.com/dogukancagatay/docker-emailrelay/blob/2.1/Dockerfile), [latest](https://github.com/dogukancagatay/docker-emailrelay/blob/master/Dockerfile)
 
-    docker run --name emailrelay \
-      -v /etc/ssl/private/key_and_cert.pem:/etc/ssl/server.pem:ro \
-      drdaeman/emailrelay \
-      -D msa.example.com --immediate --forward-to mail.example.org:smtp \
-      --server-tls /etc/ssl/server.pem --client-tls
+Alpine based Docker image for E-MailRelay. You can read capabilities, configuration etc. of E-MailRelay on its [website](http://emailrelay.sourceforge.net).
 
-To get help, check emailrelay documentation or use:
+Container configuration is done via *environment variables* and *command line arguments*. Command line arguments are given directly to ``emailrelay`` executable.
 
-    docker run --rm drdaeman/emailrelay --help
+To see all command line options of ``emailrelay`` command:
 
-Note, the `--remote-clients --port $PORT` (and some more) options are
-passed automatically, so to change client port just redefine the `PORT`
-environment variable. The default port number is 587.
+```bash
+docker run --rm dcagatay/emailrelay --help --verbose
+```
 
-For a full control, run a full command starting with `emailrelay`, i.e.:
+## Usage
+Some usage examples are given in ``docker-compose.yml``.
 
-    docker run drdaeman/emailrelay emailrelay --help
+#### Example Usage with for Gmail SMTP Service
+Sample configuration for sending emails from your Gmail account.
+
+Add your credentials to ``client-auth.txt``.
+
+```
+client plain example@gmail.com gmail-or-app-password
+```
+
+Run the docker container
+```bash
+docker run --rm \
+-p "25:25" \
+-v "$PWD/client-auth.txt:/client-auth.txt" \
+dcagatay/emailrelay --forward-on-disconnect --forward-to smtp.gmail.com:587 --client-tls --client-auth=/client-auth.txt
+```
+
+## Environment Variables
+
+#### ``DEFAULT_OPTS``
+By default the following arguments are given on runtime. You can overwrite ``DEFAULT_OPTS`` environment variable to change or disable this behaviour.
+```
+--no-daemon --no-syslog --log --log-time --remote-clients
+```
+
+#### ``PORT``
+The port that E-MailRelay runs on. Default value is ``25``. If you did TLS configuration you need to set this variable to ``587`` or something else.
+
+#### ``SPOOL_DIR``
+Spool directory for E-MailRelay. No need to change. Default value: ``/var/spool/emailrelay``
+
+#### ``SWAKS_OPTS``
+This variable is used to give options to _swaks_, it is used on built-in health-check functionality. If you serve with TLS configuration you need to set this variable to ``-tls``. Default value: _empty-string_
+
+## Filter Scripts, Client/Server Authentication, and Others
+Inside ``config`` directory you will find sample files for usage with filter functionality, SMTP client authentication and relay server authentication.
+
+For any further configuration or details, refer to the [E-MailRelay documentation](http://emailrelay.sourceforge.net).
+
+## Testing
+You can test your configuration with _swaks_.
+```bash
+docker run --rm \
+  flowman/swaks \
+  echo "This is a test message." | swaks --to to@mail.dev --from from@mail.dev --server localhost --port 25
+```
+
+## Additions to ``drdaeman/docker-emailrelay``
+- E-MailRelay version upgrade.
+- Multi stage build for quicker builds.
+- ``bash`` shell in included for further scripting.
+- Default TLS configuration is changed to insecure configuration.
+- Sample files for advanced configuration.

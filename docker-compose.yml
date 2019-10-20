@@ -1,0 +1,43 @@
+version: "3"
+services:
+
+  # emailrelay:
+  #   build: ./
+  #   image: dcagatay/emailrelay:latest
+  #   command: --domain msa.example.com --forward-on-disconnect --forward-to mail.example.org:25
+  #   ports:
+  #     - "25:25"
+  #   restart: unless-stopped
+
+  emailrelay-gmail:
+    build: ./
+    image: dcagatay/emailrelay:latest
+    command: --forward-on-disconnect --forward-to smtp.gmail.com:587 --client-tls --client-auth=/config/client-auth.txt
+    volumes:
+      - ./config:/config:ro
+    ports:
+      - "25:25"
+    restart: unless-stopped
+
+  # emailrelay-tls:
+  #   build: ./
+  #   image: dcagatay/emailrelay:latest
+  #   command: --domain msa.example.com --forward-on-disconnect --forward-to mail.example.org:587 --client-tls --server-tls /etc/ssl/server.pem
+  #   volumes:
+  #     - ./config/key_and_cert.pem:/etc/ssl/server.pem:ro
+  #   environment:
+  #     PORT: "587"
+  #     SWAKS_OPTS: "-tls"
+  #   ports:
+  #     - "587:587"
+  #   restart: unless-stopped
+
+  # emailrelay-server-client-auth:
+  #   build: ./
+  #   image: dcagatay/emailrelay:latest
+  #   command: --domain msa.example.com --filter /config/filter.sh --forward-on-disconnect --forward-to mail.example.org:587 --client-tls --client-auth=/config/client-auth.txt --server-auth=/config/server-auth.txt
+  #   volumes:
+  #     - ./config:/config:ro
+  #   ports:
+  #     - "25:25"
+  #   restart: unless-stopped
