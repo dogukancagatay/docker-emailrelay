@@ -5,7 +5,9 @@
 ![Docker Stars](https://img.shields.io/docker/stars/dcagatay/emailrelay)
 
 Available Tags:
-- [2.1](https://github.com/dogukancagatay/docker-emailrelay/blob/2.1/Dockerfile), [latest](https://github.com/dogukancagatay/docker-emailrelay/blob/master/Dockerfile)
+- [latest](https://github.com/dogukancagatay/docker-emailrelay/blob/master/Dockerfile)
+- [2.2](https://github.com/dogukancagatay/docker-emailrelay/blob/2.2/Dockerfile)
+- [2.1](https://github.com/dogukancagatay/docker-emailrelay/blob/2.1/Dockerfile)
 
 Alpine based Docker image for E-MailRelay. You can read capabilities, configuration etc. of E-MailRelay on its [website](http://emailrelay.sourceforge.net).
 

@@ -1,6 +1,6 @@
 FROM alpine:3.10 as builder
 
-ARG DOWNLOAD_URL=https://downloads.sourceforge.net/project/emailrelay/emailrelay/2.1/emailrelay-2.1a-src.tar.gz
+ARG DOWNLOAD_URL=https://downloads.sourceforge.net/project/emailrelay/emailrelay/2.2/emailrelay-2.2-src.tar.gz
 
 RUN apk add --no-cache curl g++ make autoconf automake openssl-dev \
     && mkdir -p /tmp/build && cd /tmp/build \
@@ -12,7 +12,7 @@ RUN apk add --no-cache curl g++ make autoconf automake openssl-dev \
     && make install
 
 FROM alpine:3.10
-MAINTAINER "Dogukan Cagatay <dcagatay@gmail.com>"
+LABEL maintainer="Dogukan Cagatay <dcagatay@gmail.com>"
 
 ENV PORT="25" \
     SWAKS_OPTS="" \
