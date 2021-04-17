@@ -1,4 +1,4 @@
-FROM alpine:3.10 as builder
+FROM alpine:3.13 as builder
 
 ARG DOWNLOAD_URL=https://downloads.sourceforge.net/project/emailrelay/emailrelay/2.2/emailrelay-2.2-src.tar.gz
 
@@ -11,7 +11,7 @@ RUN apk add --no-cache curl g++ make autoconf automake openssl-dev \
     && make -j $(nproc --all) \
     && make install
 
-FROM alpine:3.10
+FROM alpine:3.13
 LABEL maintainer="Dogukan Cagatay <dcagatay@gmail.com>"
 
 ENV PORT="25" \
@@ -19,14 +19,15 @@ ENV PORT="25" \
     DEFAULT_OPTS="--no-daemon --no-syslog --log --log-time --remote-clients" \
     SPOOL_DIR="/var/spool/emailrelay"
 
-RUN apk add --update --no-cache --repository http://dl-cdn.alpinelinux.org/alpine/edge/testing \
+RUN apk add --update --no-cache \
     libstdc++ \
     openssl \
     ca-certificates \
     dumb-init \
-    swaks \
     bash \
-    perl-net-ssleay \
+    perl-net-ssleay && \
+    apk add --update --no-cache --repository http://dl-cdn.alpinelinux.org/alpine/edge/testing \
+    swaks \
     && rm -rf /var/tmp/* /var/cache/apk/* /var/cache/distfiles/* \
     && mkdir -p "${SPOOL_DIR}"
 
