@@ -4,9 +4,9 @@
 CONTENT_FILE="${1}"
 ENVELOPE_FILE="${2}"
 
-FROM="`awk '/X-MailRelay-From:/ {print $2;exit}' \"${ENVELOPE_FILE}\"`"
-TO="`awk '/X-MailRelay-To-Remote:/ {print $2;exit}' \"${ENVELOPE_FILE}\"`"
-CLIENT_IP="`awk '/MailRelay-Client:/ {print $2;exit}' \"${ENVELOPE_FILE}\"`"
+FROM="$(awk '/X-MailRelay-From:/ {print $2;exit}' \"${ENVELOPE_FILE}\")"
+TO="$(awk '/X-MailRelay-To-Remote:/ {print $2;exit}' \"${ENVELOPE_FILE}\")"
+CLIENT_IP="$(awk '/MailRelay-Client:/ {print $2;exit}' \"${ENVELOPE_FILE}\")"
 #############################################################################
 
 
