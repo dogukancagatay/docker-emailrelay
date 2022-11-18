@@ -6,6 +6,7 @@
 
 Available Tags:
 - [latest](https://github.com/dogukancagatay/docker-emailrelay/blob/master/Dockerfile)
+- [2.3](https://github.com/dogukancagatay/docker-emailrelay/blob/2.3/Dockerfile)
 - [2.2](https://github.com/dogukancagatay/docker-emailrelay/blob/2.2/Dockerfile)
 - [2.1](https://github.com/dogukancagatay/docker-emailrelay/blob/2.1/Dockerfile)
 - [2.0.1](https://github.com/dogukancagatay/docker-emailrelay/blob/2.0.1/Dockerfile)
