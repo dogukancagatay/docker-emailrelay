@@ -1,20 +1,20 @@
-# Docker image for E-MailRelay
+# Docker image for E-MailRelay ([dcagatay/emailrelay](https://hub.docker.com/r/dcagatay/emailrelay))
 
-![MicroBadger Size](https://img.shields.io/microbadger/image-size/dcagatay/emailrelay)
-![MicroBadger Layers](https://img.shields.io/microbadger/layers/dcagatay/emailrelay)
 ![Docker Pulls](https://img.shields.io/docker/pulls/dcagatay/emailrelay)
 ![Docker Stars](https://img.shields.io/docker/stars/dcagatay/emailrelay)
 
 Available Tags:
 
-- [latest](https://github.com/dogukancagatay/docker-emailrelay/blob/master/Dockerfile)
-- [2.4](https://github.com/dogukancagatay/docker-emailrelay/blob/2.4/Dockerfile)
-- [2.3](https://github.com/dogukancagatay/docker-emailrelay/blob/2.3/Dockerfile)
-- [2.2](https://github.com/dogukancagatay/docker-emailrelay/blob/2.2/Dockerfile)
-- [2.1](https://github.com/dogukancagatay/docker-emailrelay/blob/2.1/Dockerfile)
-- [2.0.1](https://github.com/dogukancagatay/docker-emailrelay/blob/2.0.1/Dockerfile)
+[All tags](https://hub.docker.com/r/dcagatay/emailrelay/tags)
 
-Alpine based Docker image for E-MailRelay. You can read capabilities, configuration etc. of E-MailRelay on its [website](http://emailrelay.sourceforge.net).
+- `latest`, `2.4`
+- `2.3`
+- `2.2`
+- `2.1`
+- `2.0.1`
+
+
+Alpine based Docker image for E-MailRelay. You can find more on its [website](http://emailrelay.sourceforge.net).
 
 Container configuration is done via _environment variables_ and _command line arguments_. Command line arguments are given directly to `emailrelay` executable.
 
@@ -81,8 +81,9 @@ You can test your configuration with _swaks_.
 
 ```bash
 docker run --rm \
-  flowman/swaks \
-  echo "This is a test message." | swaks --to to@mail.dev --from from@mail.dev --server localhost --port 25
+  --entrypoint /bin/sh \
+  dcagatay/emailrelay:latest \
+  -c 'echo "This is a test message." | swaks --to to@mail.dev --from from@mail.dev --server localhost --port 25'
 ```
 
 ## Additions to `drdaeman/docker-emailrelay`
