@@ -8,8 +8,6 @@ on:
       - docker-compose.yml
     # branches:
     #   - master
-  # schedule:
-  #   - cron: "30 6 5 * *" # Run monthly for updates
 
 jobs:
   build-push-latest:
@@ -24,7 +22,7 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
-      - name: Install gather Azure Devops Agent versions from API
+      - name: Get version from Dockerfile
         id: version_provider
         run: |
           VERSION=$(grep 'ARG BASE_VERSION' Dockerfile | awk -F= '{print $2}')
@@ -42,10 +40,12 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build and push
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v3
         with:
           platforms: linux/amd64,linux/arm64
           push: ${{ github.ref == 'refs/heads/master' }}
+          cache-from: |
+            dcagatay/emailrelay:latest
           tags: |
-            dcagatay/pwless-pgadmin4:latest
-            dcagatay/pwless-pgadmin4:${{steps.version_provider.outputs.version}}
+            dcagatay/emailrelay:latest
+            dcagatay/emailrelay:${{steps.version_provider.outputs.version}}
