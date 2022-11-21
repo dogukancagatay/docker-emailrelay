@@ -1,22 +1,22 @@
 name: build-push-latest-version
 on:
+  workflow_dispatch:
   push:
     paths-ignore:
       - README.md
       - LICENSE
       - docker-compose.yml
-    branches:
-      - master
-  #  workflow_dispatch:
-  #  schedule:
-  #    - cron: "30 6 5 * *" # Run monthly for updates
+    # branches:
+    #   - master
+  # schedule:
+  #   - cron: "30 6 5 * *" # Run monthly for updates
 
 jobs:
   build-push-latest:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
@@ -36,6 +36,7 @@ jobs:
 
       - name: Login to DockerHub
         uses: docker/login-action@v1
+        if: ${{ github.ref == 'refs/heads/master' }}
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
@@ -44,7 +45,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           platforms: linux/amd64,linux/arm64
-          push: true
+          push: ${{ github.ref == 'refs/heads/master' }}
           tags: |
             dcagatay/pwless-pgadmin4:latest
             dcagatay/pwless-pgadmin4:${{steps.version_provider.outputs.version}}
