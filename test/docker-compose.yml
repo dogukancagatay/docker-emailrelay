@@ -1,0 +1,11 @@
+version: "3"
+services:
+
+  emailrelay-mailtrap:
+    build: ../
+    command: --forward-on-disconnect --forward-to smtp.mailtrap.io:587 --client-tls --client-auth=/config/client-auth.txt
+    volumes:
+      - ./config:/config:ro
+    ports:
+      - "9025:25"
+    restart: unless-stopped
