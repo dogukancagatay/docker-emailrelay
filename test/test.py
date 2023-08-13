@@ -13,6 +13,11 @@ API_TOKEN = os.getenv("MAILTRAP_API_TOKEN", None)
 USERNAME = os.getenv("MAILTRAP_USERNAME", None)
 PASSWORD = os.getenv("MAILTRAP_PASSWORD", None)
 
+SMTP_ADDRESS = os.getenv("SMTP_ADDRESS", "localhost")
+SMTP_PORT = int(os.getenv("SMTP_PORT", 25))
+SMTP_USERNAME = os.getenv("SMTP_USERNAME", None)
+SMTP_PASSWORD = os.getenv("SMTP_PASSWORD", None)
+
 MAILTRAP_ACCOUNTS_API_URL = "https://mailtrap.io/api/accounts"
 
 EMAIL_BODY_TEMPLATE = string.Template(
@@ -110,9 +115,9 @@ def get_messages_from_inbox(
 
 def send_test_email(
     smtp_address: str = "localhost",
-    smtp_port: int = 25,
-    smtp_username: str | None = None,
-    smtp_password: str | None = None,
+    smtp_port: int = "25",
+    smtp_username: str | None = SMTP_USERNAME,
+    smtp_password: str | None = SMTP_PASSWORD,
 ) -> tuple[str, str, str, str, str, str]:
 
     fake = faker.Faker()
@@ -252,7 +257,7 @@ if __name__ == "__main__":
         sender_name,
         receiver_email,
         receiver_name,
-    ) = send_test_email("localhost", 9025)
+    ) = send_test_email(SMTP_ADDRESS, SMTP_PORT)
     print("Wait for 10 secs...")
     time.sleep(10)
 
