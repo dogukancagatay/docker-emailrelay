@@ -3,9 +3,18 @@ services:
   emailrelay:
     build: ./
     image: dcagatay/emailrelay:latest
-    command: --domain msa.example.com --forward-on-disconnect --forward-to mail.example.org:25
+    command: --forward-on-disconnect --forward-to mailpit:1025
     ports:
       - "25:25"
+    restart: unless-stopped
+
+  mailpit:
+    image: axllent/mailpit
+    logging:
+      driver: "none" # disable saving logs
+    ports:
+      - 1025:1025 # smtp server
+      - 8025:8025 # web ui
     restart: unless-stopped
 
   # emailrelay-gmail:
