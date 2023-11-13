@@ -3,7 +3,7 @@ services:
 
   emailrelay:
     build: ../
-    command: --forward-on-disconnect --forward-to sandbox.smtp.mailtrap.io:2525 --client-auth=/config/client-auth.txt
+    command: --verbose --forward-on-disconnect --forward-to sandbox.smtp.mailtrap.io:2525 --client-auth=/config/client-auth.txt
     volumes:
       - ./config:/config:ro
     ports:
