@@ -7,14 +7,14 @@ Available Tags:
 
 [All tags](https://hub.docker.com/r/dcagatay/emailrelay/tags)
 
-- `latest`, `2.5`
+- `latest`, `2.5.1`
+- `2.5`
 - `2.4.1`
 - `2.4`
 - `2.3`
 - `2.2`
 - `2.1`
 - `2.0.1`
-
 
 Alpine based Docker image for E-MailRelay. You can find more on its [website](http://emailrelay.sourceforge.net).
 

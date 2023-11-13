@@ -1,7 +1,8 @@
 FROM alpine:3.18
 LABEL maintainer="Dogukan Cagatay <dcagatay@gmail.com>"
 
-ARG BASE_VERSION=2.5
+# BASE_VERSION is X.X for minor and X.X.X for patch
+ARG BASE_VERSION=2.5.1
 ARG DOWNLOAD_URL=https://downloads.sourceforge.net/project/emailrelay/emailrelay/${BASE_VERSION}/emailrelay-${BASE_VERSION}-src.tar.gz
 
 ENV PORT="25" \
