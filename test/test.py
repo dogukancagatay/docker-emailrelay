@@ -4,21 +4,22 @@ import string
 import sys
 import time
 import uuid
+from typing import Any, TypeAlias, cast
+from urllib.parse import urljoin
 
 import faker
 import requests
 
+JSON: TypeAlias = dict[str, "JSON"] | list["JSON"] | str | int | float | bool | None
 
-API_TOKEN = os.getenv("MAILTRAP_API_TOKEN", None)
+
 USERNAME = os.getenv("MAILTRAP_USERNAME", None)
 PASSWORD = os.getenv("MAILTRAP_PASSWORD", None)
 
 SMTP_ADDRESS = os.getenv("SMTP_ADDRESS", "localhost")
-SMTP_PORT = int(os.getenv("SMTP_PORT", 25))
+SMTP_PORT = int(os.getenv("SMTP_PORT", "25"))
 SMTP_USERNAME = os.getenv("SMTP_USERNAME", None)
 SMTP_PASSWORD = os.getenv("SMTP_PASSWORD", None)
-
-MAILTRAP_ACCOUNTS_API_URL = "https://mailtrap.io/api/accounts"
 
 EMAIL_BODY_TEMPLATE = string.Template(
     """\
@@ -32,94 +33,122 @@ $message_text
 
 
 def write_config(client_username: str, client_password: str) -> None:
-    with open("config/client-auth.txt", mode="w") as f:
+    with open("config/client-auth.txt", mode="w", encoding="UTF-8") as f:
         f.write(f"client plain {client_username} {client_password}")
 
-    with open("config/server-auth.txt", mode="w") as f:
+    with open("config/server-auth.txt", mode="w", encoding="UTF-8") as f:
         f.write("")
 
 
-def get_account_id(api_url_prefix: str, api_token: str) -> int:
+class MailtrapClient:
+    api_url_prefix: str = "https://mailtrap.io/"
+    api_token: str | None = os.getenv("MAILTRAP_API_TOKEN", None)
+    request_timeout = 10
 
-    headers = {
-        "Api-Token": api_token,
-        "Content-Type": "application/json",
-    }
+    def __init__(self):
+        if not self.api_token:
+            print("ERROR: Cannot continue without MAILTRAP_API_TOKEN environment variable")
+            sys.exit(2)
 
-    r = requests.get(f"{api_url_prefix}", headers=headers)
-    assert r.status_code == 200
+    def get_request(self, path: str, **kwargs: Any) -> requests.Response:
+        return self._request("GET", path, **kwargs)
 
-    account_list = r.json()
-    assert len(account_list) > 0
+    def post_request(self, path: str, **kwargs: Any) -> requests.Response:
+        return self._request("POST", path, **kwargs)
 
-    assert "id" in account_list[0]
-    assert account_list[0] is not None
-    account_id = account_list[0]["id"]
+    def delete_request(self, path: str, **kwargs: Any) -> requests.Response:
+        return self._request("DELETE", path, **kwargs)
 
-    return account_id
+    def _request(self, method: str, path: str, **kwargs: Any) -> requests.Response:
+        url = urljoin(self.api_url_prefix, path)
+        headers: dict[str, str] = {
+            "Api-Token": cast(str, self.api_token),
+        }
 
+        # Populate headers if provided
+        headers.update(kwargs.pop("headers", {}))
 
-def get_inbox_list(api_url_prefix: str, api_token: str, account_id: int) -> list:
+        return requests.request(
+            method,
+            url,
+            headers=headers,
+            timeout=kwargs.pop("timeout", self.request_timeout),
+            **kwargs,
+        )
 
-    headers = {
-        "Api-Token": api_token,
-        "Content-Type": "application/json",
-    }
+    def get_account_id(self) -> str:
+        r = self.get_request("/api/accounts")
+        assert r.status_code == 200
 
-    r = requests.get(f"{api_url_prefix}/{account_id}/inboxes", headers=headers)
-    assert r.status_code == 200
+        account_list = r.json()
+        assert len(account_list) > 0
 
-    inbox_list = r.json()
+        assert "id" in account_list[0]
+        assert account_list[0] is not None
+        return str(account_list[0]["id"])
 
-    assert inbox_list is not None
-    assert len(inbox_list) > 0
+    def get_inbox_list(self, account_id: str) -> JSON:
+        r = self.get_request(f"/api/accounts/{account_id}/inboxes")
+        assert r.status_code == 200
 
-    return inbox_list
+        inbox_list: JSON = r.json()
 
+        assert inbox_list is not None
+        assert len(inbox_list) > 0
 
-def delete_message_from_inbox(
-    api_url_prefix: str, api_token: str, account_id: int, inbox_id: int, message_id: int
-):
-    headers = {
-        "Api-Token": api_token,
-        "Content-Type": "application/json",
-    }
+        return inbox_list
 
-    r = requests.delete(
-        f"{api_url_prefix}/{account_id}/inboxes/{inbox_id}/messages/{message_id}",
-        headers=headers,
-    )
-    assert r.status_code == 200, f"Message delete failed: {r.text}"
+    def delete_message_from_inbox(self, account_id: str, inbox_id: str, message_id: str) -> None:
+        r = self.delete_request(f"/api/accounts/{account_id}/inboxes/{inbox_id}/messages/{message_id}")
+        assert r.status_code == 200, f"Message delete failed: {r.text}"
 
+    def get_messages_from_inbox(self, account_id: str, inbox_id: str) -> JSON:
+        # Get Messages
+        r = self.get_request(f"/api/accounts/{account_id}/inboxes/{inbox_id}/messages")
+        assert r.status_code == 200
 
-def get_messages_from_inbox(
-    api_url_prefix: str, api_token: str, account_id: int, inbox_id: str
-) -> list:
+        message_list: JSON = r.json()
+        assert message_list is not None
 
-    headers = {
-        "Api-Token": api_token,
-        "Content-Type": "application/json",
-    }
+        return message_list
 
-    # Get Messages
-    r = requests.get(
-        f"{api_url_prefix}/{account_id}/inboxes/{inbox_id}/messages", headers=headers
-    )
-    assert r.status_code == 200
+    def get_message_from_inbox(self, account_id: str, inbox_id: str, message_id: str) -> tuple[JSON, str]:
+        # Get message json
+        r = self.get_request(f"/api/accounts/{account_id}/inboxes/{inbox_id}/messages/{message_id}")
+        assert r.status_code == 200, f"Message detail request failed: {r.text}"
 
-    message_list = r.json()
-    assert message_list is not None
+        message: JSON = r.json()
+        assert message is not None, "Received message object cannot be None"
 
-    return message_list
+        # Get message body
+        r = self.get_request(f"/api/accounts/{account_id}/inboxes/{inbox_id}/messages/{message_id}/body.txt")
+        assert r.status_code == 200
+
+        message_body: str = r.text
+        assert message_body is not None, "Message body cannot be empty"
+        assert len(message_body) > 0, "Message body cannot be empty"
+
+        return message, message_body
+
+    def empty_inbox(self, account_id: str, inbox_id: str) -> None:
+        messages = self.get_messages_from_inbox(account_id, inbox_id)
+        if messages:
+            print(f"There are messages ({len(messages)}) in the inbox, will empty")
+
+        # Delete messages
+        for message in messages:
+            assert "id" in message
+
+            print(f"Deleting message({message['id']}) from inbox({inbox_id})")
+            self.delete_message_from_inbox(account_id, inbox_id, message["id"])
 
 
 def send_test_email(
     smtp_address: str = "localhost",
-    smtp_port: int = "25",
+    smtp_port: int = 25,
     smtp_username: str | None = SMTP_USERNAME,
     smtp_password: str | None = SMTP_PASSWORD,
 ) -> tuple[str, str, str, str, str, str]:
-
     fake = faker.Faker()
 
     sender_profile = fake.simple_profile()
@@ -132,9 +161,7 @@ def send_test_email(
     receiver_email: str = receiver_profile["mail"]
     receiver_name: str = receiver_profile["name"]
     subject: str = f"[Test] - {fake.sentence(nb_words=4)}"
-    message_text: str = (
-        f"This is a test e-mail message with random string {control_str} to check.\n\n"
-    )
+    message_text: str = f"This is a test e-mail message with random string {control_str} to check.\n\n"
     message_text += "\n".join(fake.paragraphs(nb=1))
 
     sender = f"{sender_name} <{sender_email}>"
@@ -147,7 +174,6 @@ def send_test_email(
     )
 
     with smtplib.SMTP(smtp_address, smtp_port) as server:
-
         if smtp_username and smtp_password:
             server.login(smtp_username, smtp_password)
 
@@ -164,78 +190,20 @@ def send_test_email(
     )
 
 
-def get_message_from_inbox(
-    api_url_prefix: str, api_token: str, account_id: int, inbox_id: str, message_id: str
-) -> tuple[dict, str]:
-
-    headers = {
-        "Api-Token": api_token,
-        "Content-Type": "application/json",
-    }
-
-    # Get message json
-    r = requests.get(
-        f"{api_url_prefix}/{account_id}/inboxes/{inbox_id}/messages/{message_id}",
-        headers=headers,
-    )
-    assert r.status_code == 200, f"Message detail request failed: {r.text}"
-
-    message = r.json()
-    assert message is not None, "Received message object cannot be None"
-
-    # Get message body
-    r = requests.get(
-        f"{MAILTRAP_ACCOUNTS_API_URL}/{account_id}/inboxes/{inbox_id}/messages/{message_id}/body.txt",
-        headers=headers,
-    )
-    assert r.status_code == 200
-
-    message_body = r.text
-    assert (
-        message_body is not None and len(message_body) > 0
-    ), "Message body cannot be Empty"
-
-    return message, message_body
-
-
-def empty_inbox(
-    api_url_prefix: str, api_token: str, account_id: int, inbox_id: str
-) -> None:
-
-    message_list = get_messages_from_inbox(
-        api_url_prefix, api_token, account_id, inbox_id
-    )
-    if message_list:
-        print(f"There are messages ({len(message_list)}) in the inbox, will empty")
-
-    # Delete messages
-    for message in get_messages_from_inbox(
-        api_url_prefix, api_token, account_id, inbox_id
-    ):
-        assert "id" in message
-
-        print(f"Deleting message({message['id']}) from inbox({inbox_id})")
-        delete_message_from_inbox(
-            api_url_prefix, api_token, account_id, inbox_id, message["id"]
-        )
-
-
 if __name__ == "__main__":
-
-    for p in [API_TOKEN, USERNAME, PASSWORD]:
-        if not p:
-            print(
-                "ERROR: Cannot continue without MAILTRAP_API_TOKEN, MAILTRAP_USERNAME, MAILTRAP_PASSWORD environment variables"
-            )
-            sys.exit(1)
+    if not USERNAME or not PASSWORD:
+        print("ERROR: Cannot continue without MAILTRAP_USERNAME, MAILTRAP_PASSWORD environment variables")
+        sys.exit(1)
 
     write_config(USERNAME, PASSWORD)
 
+    mailtrap = MailtrapClient()
+
     print("Get the account id")
-    account_id = get_account_id(MAILTRAP_ACCOUNTS_API_URL, API_TOKEN)
+    account_id = mailtrap.get_account_id()
 
     print(f"Obtain inbox list of account({account_id})")
-    inbox_list = get_inbox_list(MAILTRAP_ACCOUNTS_API_URL, API_TOKEN, account_id)
+    inbox_list = mailtrap.get_inbox_list(account_id)
 
     # Get the inbox_id of the first inbox
     assert inbox_list[0] is not None
@@ -247,7 +215,7 @@ if __name__ == "__main__":
     smtp_password = inbox_list[0]["password"]
 
     print(f"Check for residual messages in the inbox({inbox_id})")
-    empty_inbox(MAILTRAP_ACCOUNTS_API_URL, API_TOKEN, account_id, inbox_id)
+    mailtrap.empty_inbox(account_id, inbox_id)
 
     print("Send test email")
     (
@@ -263,39 +231,29 @@ if __name__ == "__main__":
 
     # Check inbox for new email messages
     print("Check inbox for new messages")
-    new_message_list = get_messages_from_inbox(
-        MAILTRAP_ACCOUNTS_API_URL, API_TOKEN, account_id, inbox_id
-    )
+    new_message_list = mailtrap.get_messages_from_inbox(account_id, inbox_id)
     assert new_message_list is not None, "Messages gathered from inbox cannot be None"
-    assert (
-        len(new_message_list) == 1
-    ), f"Number of messages in the inbox is not 1 ({len(new_message_list)})"
+    assert len(new_message_list) == 1, f"Number of messages in the inbox is not 1 ({len(new_message_list)})"
     assert "id" in new_message_list[0]
 
     print("Getting the message")
-    new_message_list = get_messages_from_inbox(
-        MAILTRAP_ACCOUNTS_API_URL, API_TOKEN, account_id, inbox_id
-    )
+    new_message_list = mailtrap.get_messages_from_inbox(account_id, inbox_id)
     # Get message details and body
     message_id = new_message_list[0]["id"]
-    message, message_body = get_message_from_inbox(
-        MAILTRAP_ACCOUNTS_API_URL, API_TOKEN, account_id, inbox_id, message_id
-    )
+    message, message_body = mailtrap.get_message_from_inbox(account_id, inbox_id, message_id)
 
     print("Checking message details")
     # Check received message details
     assert (
         message["subject"] == subject
     ), f"Received email subject({message['subject']}) is different from expected value({subject})"
-    assert (
-        message["from_email"] == sender_email
-    ), f"{message['from_email']} != {sender_email}"
+    assert message["from_email"] == sender_email, f"{message['from_email']} != {sender_email}"
     assert message["from_name"] == sender_name
     assert message["to_email"] == receiver_email
     assert message["to_name"] == receiver_name
     assert control_str in message_body, f"'{control_str}' is not in '{message_body}'"
 
     print(f"Will cleanup inbox({inbox_id})")
-    empty_inbox(MAILTRAP_ACCOUNTS_API_URL, API_TOKEN, account_id, inbox_id)
+    mailtrap.empty_inbox(account_id, inbox_id)
 
     print("Done")

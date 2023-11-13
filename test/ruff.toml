@@ -1,0 +1,3 @@
+target-version = "py311"
+select = ["E", "F", "UP", "PT", "TID"]
+line-length = 125
