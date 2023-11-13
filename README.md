@@ -30,7 +30,7 @@ docker run --rm dcagatay/emailrelay --help --verbose
 
 Some usage examples are given in `docker-compose.yml`.
 
-#### Example Usage with for Gmail SMTP Service
+### Example Usage with for Gmail SMTP Service
 
 Sample configuration for sending emails from your Gmail account.
 
@@ -51,7 +51,7 @@ dcagatay/emailrelay --forward-on-disconnect --forward-to smtp.gmail.com:587 --cl
 
 ## Environment Variables
 
-#### `DEFAULT_OPTS`
+### `DEFAULT_OPTS`
 
 By default the following arguments are given on runtime. You can overwrite `DEFAULT_OPTS` environment variable to change or disable this behaviour.
 
@@ -59,15 +59,15 @@ By default the following arguments are given on runtime. You can overwrite `DEFA
 --no-daemon --no-syslog --log --log-time --remote-clients
 ```
 
-#### `PORT`
+### `PORT`
 
 The port that E-MailRelay runs on. Default value is `25`. If you did TLS configuration you need to set this variable to `587` or something else.
 
-#### `SPOOL_DIR`
+### `SPOOL_DIR`
 
 Spool directory for E-MailRelay. No need to change. Default value: `/var/spool/emailrelay`
 
-#### `SWAKS_OPTS`
+### `SWAKS_OPTS`
 
 This variable is used to give options to _swaks_, it is used on built-in health-check functionality. If you serve with TLS configuration you need to set this variable to `-tls`. Default value: _empty-string_
 
@@ -82,15 +82,21 @@ For any further configuration or details, refer to the [E-MailRelay documentatio
 You can test your configuration with _swaks_.
 
 ```bash
-docker run --rm \
+echo "This is a test message." | swaks --to to@mail.dev --from from@mail.dev --server emailrelay --port 9025
+```
+
+Or use a container, after running the containers in `docker-compose.yml` you could run the following command to test with _swaks_ and see the test email on [localhost:8025]().
+
+```bash
+docker-compose run \
   --entrypoint /bin/sh \
-  dcagatay/emailrelay:latest \
-  -c 'echo "This is a test message." | swaks --to to@mail.dev --from from@mail.dev --server localhost --port 25'
+  emailrelay \
+  -c 'echo "This is a test message." | swaks --to <to@mail.dev> --from <from@mail.dev> --server emailrelay --port 25'
 ```
 
 ## Additions to `drdaeman/docker-emailrelay`
 
-- E-MailRelay version upgrade.
+- E-MailRelay version upgrade(s).
 - Multi stage build for quicker builds.
 - `bash` shell in included for further scripting.
 - Default TLS configuration is changed to insecure configuration.
