@@ -1,6 +1,9 @@
 .git
 .github
 .vscode
+.venv
+.mypy_cache
+.ruff_cache
 README.md
 config
 test
