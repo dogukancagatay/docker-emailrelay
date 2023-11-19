@@ -1,11 +1,11 @@
 # Docker image for E-MailRelay ([dcagatay/emailrelay](https://hub.docker.com/r/dcagatay/emailrelay))
 
 ![Docker Pulls](https://img.shields.io/docker/pulls/dcagatay/emailrelay)
-![Docker Stars](https://img.shields.io/docker/stars/dcagatay/emailrelay)
+![GitHub tag](https://img.shields.io/github/v/tag/dogukancagatay/docker-emailrelay)
 
 Available Tags:
 
-[All tags](https://hub.docker.com/r/dcagatay/emailrelay/tags)
+[List of all image tags](https://hub.docker.com/r/dcagatay/emailrelay/tags)
 
 - `latest`, `2.6`
 - `2.5.2`
@@ -15,9 +15,6 @@ Available Tags:
 - `2.4.1`
 - `2.4`
 - `2.3`
-- `2.2`
-- `2.1`
-- `2.0.1`
 
 Alpine based Docker image for E-MailRelay. You can find more on its [website](http://emailrelay.sourceforge.net).
 
@@ -47,9 +44,9 @@ Run the docker container
 
 ```bash
 docker run --rm \
--p "25:25" \
--v "$PWD/client-auth.txt:/client-auth.txt" \
-dcagatay/emailrelay --forward-on-disconnect --forward-to smtp.gmail.com:587 --client-tls --client-auth=/client-auth.txt
+  -p "25:25" \
+  -v "$PWD/client-auth.txt:/client-auth.txt" \
+  dcagatay/emailrelay --forward-on-disconnect --forward-to smtp.gmail.com:587 --client-tls --client-auth=/client-auth.txt
 ```
 
 ## Environment Variables
@@ -58,7 +55,7 @@ dcagatay/emailrelay --forward-on-disconnect --forward-to smtp.gmail.com:587 --cl
 
 By default the following arguments are given on runtime. You can overwrite `DEFAULT_OPTS` environment variable to change or disable this behaviour.
 
-```
+```text
 --no-daemon --no-syslog --log --log-time --remote-clients
 ```
 
@@ -100,7 +97,7 @@ docker-compose run \
 ## Additions to `drdaeman/docker-emailrelay`
 
 - E-MailRelay version upgrade(s).
-- Multi stage build for quicker builds.
-- `bash` shell in included for further scripting.
+- Smaller container images.
+- Included `bash` shell for further scripting.
 - Default TLS configuration is changed to insecure configuration.
 - Sample files for advanced configuration.
