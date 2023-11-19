@@ -1,4 +1,4 @@
-name: build-push-latest-version
+name: build-latest
 on:
   workflow_dispatch:
   push:
