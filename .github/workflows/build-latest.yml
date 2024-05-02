@@ -1,0 +1,46 @@
+name: build-latest
+on:
+  workflow_dispatch:
+  push:
+    paths-ignore:
+      - LICENSE
+      - docker-compose.yml
+    # branches:
+    #   - main
+
+jobs:
+  build-push-latest:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          platforms: linux/amd64,linux/arm64
+          push: ${{ github.ref == 'refs/heads/main' }}
+          cache-from: |
+            dcagatay/emailrelay:latest
+          tags: |
+            dcagatay/emailrelay:latest
+
+      - name: Update repo description
+        uses: peter-evans/dockerhub-description@v4
+        if: ${{ github.ref == 'refs/heads/main' }}
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          repository: dcagatay/emailrelay
