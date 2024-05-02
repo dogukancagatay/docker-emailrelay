@@ -5,8 +5,8 @@ on:
     paths-ignore:
       - LICENSE
       - docker-compose.yml
-    tags-ignore:
-      - '**'
+    branches:
+      - "*"
 
 jobs:
   build-push-latest:
