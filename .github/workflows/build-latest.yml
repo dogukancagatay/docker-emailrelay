@@ -32,10 +32,9 @@ jobs:
         with:
           platforms: linux/amd64,linux/arm64
           push: ${{ github.ref == 'refs/heads/main' }}
-          cache-from: |
-            dcagatay/emailrelay:latest
-          tags: |
-            dcagatay/emailrelay:latest
+          cache-from: type=gha,ref=dcagatay/emailrelay
+          cache-to: type=gha,ref=dcagatay/emailrelay,mode=max
+          tags: dcagatay/emailrelay:latest
 
       - name: Update repo description
         uses: peter-evans/dockerhub-description@v4
