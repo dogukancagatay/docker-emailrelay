@@ -1,11 +1,11 @@
 FROM alpine:3.18
 
 # BASE_VERSION is X.X for minor and X.X.X for patch
-ARG BASE_VERSION=2.5.1
-ARG SUB_VERSION=a
+ARG BASE_VERSION=2.5.2
+ARG SUB_VERSION=
 ARG DOWNLOAD_URL=https://downloads.sourceforge.net/project/emailrelay/emailrelay/${BASE_VERSION}/emailrelay-${BASE_VERSION}${SUB_VERSION}-src.tar.gz
 
-LABEL org.opencontainers.image.title="E-mailRelay"
+LABEL org.opencontainers.image.title="E-MailRelay"
 LABEL org.opencontainers.image.description="Alpine based container image for E-mailRelay"
 LABEL org.opencontainers.image.source="https://github.com/dogukancagatay/docker-emailrelay"
 LABEL org.opencontainers.image.licenses=MIT
