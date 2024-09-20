@@ -1,7 +1,7 @@
-FROM alpine:3.18
+FROM alpine:3.20
 
 # BASE_VERSION is X.X for minor and X.X.X for patch
-ARG BASE_VERSION=2.5.2
+ARG BASE_VERSION=2.6
 ARG SUB_VERSION=
 ARG DOWNLOAD_URL=https://downloads.sourceforge.net/project/emailrelay/emailrelay/${BASE_VERSION}/emailrelay-${BASE_VERSION}${SUB_VERSION}-src.tar.gz
 
