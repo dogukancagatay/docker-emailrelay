@@ -7,7 +7,8 @@ Available Tags:
 
 [All tags](https://hub.docker.com/r/dcagatay/emailrelay/tags)
 
-- `latest`, `2.5.2`
+- `latest`, `2.6`
+- `2.5.2`
 - `2.5.1a`
 - `2.5.1`
 - `2.5`
