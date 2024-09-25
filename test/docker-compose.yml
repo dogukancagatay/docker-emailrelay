@@ -2,10 +2,20 @@ services:
 
   emailrelay:
     build: ../
-    command: --verbose --forward-on-disconnect --forward-to sandbox.smtp.mailtrap.io:2525 --client-auth=/config/client-auth.txt
+    # command: --verbose --forward-on-disconnect --forward-to sandbox.smtp.mailtrap.io:2525 --client-auth=/config/client-auth.txt
+    command: --verbose --forward-on-disconnect --forward-to mailpit:1025
     volumes:
       - ./config:/config:ro
     ports:
-      - "9025:25"
+      - ${SMTP_PORT:-9025}:25
+    restart: unless-stopped
+
+  mailpit:
+    image: axllent/mailpit
+    logging:
+      driver: "none" # disable saving logs
+    ports:
+      - ${MAILPIT_SMTP_PORT:-1025}:1025 # smtp server
+      - ${MAILPIT_API_PORT:-8025}:8025 # webui
     restart: unless-stopped
 
