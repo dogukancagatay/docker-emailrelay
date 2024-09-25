@@ -1,7 +1,7 @@
 # Docker image for E-MailRelay ([dcagatay/emailrelay](https://hub.docker.com/r/dcagatay/emailrelay))
 
-![Docker Pulls](https://img.shields.io/docker/pulls/dcagatay/emailrelay)
-![GitHub tag](https://img.shields.io/github/v/tag/dogukancagatay/docker-emailrelay)
+[![Docker Pulls](https://img.shields.io/docker/pulls/dcagatay/emailrelay)](https://hub.docker.com/r/dcagatay/emailrelay)
+[![GitHub tag](https://img.shields.io/github/v/tag/dogukancagatay/docker-emailrelay)](https://github.com/dogukancagatay/docker-emailrelay/tags)
 
 Available Tags:
 
