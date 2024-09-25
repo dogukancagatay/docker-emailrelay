@@ -5,3 +5,4 @@
 .ruff_cache
 test/config/client-auth.txt
 test/config/server-auth.txt
+__pycache__
