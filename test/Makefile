@@ -17,7 +17,7 @@ svc: build
 
 test: svc $(VENV)/bin/activate
 	. $(VENV)/bin/activate
-	SMTP_PORT=9025 $(PYTHON) test.py
+	SMTP_PORT=9025 $(PYTHON) test_mailtrap.py
 	docker compose down --remove-orphans --volumes
 
 clean:
