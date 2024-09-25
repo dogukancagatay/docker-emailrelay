@@ -1,3 +1,5 @@
-requests==2.28.1
 Faker==17.5.0
+pytest==8.3.3
+python-dotenv==1.0.1
+requests==2.28.1
 ruff==0.6.7
